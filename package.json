@@ -1,0 +1,15 @@
+{
+  "name": "advent-of-code-2021",
+  "version": "1.0.0",
+  "description": "Advent of Code is an Advent calendar of small programming puzzles for a variety of skill sets and skill levels.",
+  "repository": "https://github.com/bbush915/advent-of-code-2021.git",
+  "author": "Bryan Bush <bushb@umich.edu>",
+  "private": "true",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.3",
+    "jest": "^27.4.0"
+  }
+}
