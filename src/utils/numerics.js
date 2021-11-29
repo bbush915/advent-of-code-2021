@@ -29,7 +29,7 @@ function crt(a, m) {
  * @typedef ExtendedGCD
  * @type {object}
  * @property {number} gcd The greatest common divisor.
- * @property {string} bezout - The Bézout coefficients.
+ * @property {string} bezout The Bézout coefficients.
  */
 
 /**
