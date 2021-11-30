@@ -8,7 +8,8 @@
   "scripts": {
     "run:all": "node src/index.js",
     "run:one": "node src/index.js $DAY",
-    "get:input": "sleep 30 && curl --cookie \"session=$SESSION\" https://adventofcode.com/$YEAR/day/$DAY/input > src/day.$DAY.input.txt"
+    "get:input": "sleep 30 && curl --cookie \"session=$SESSION\" https://adventofcode.com/$YEAR/day/$DAY/input > src/day.$DAY.input.txt",
+    "test": "jest"
   },
   "dependencies": {},
   "devDependencies": {
