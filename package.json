@@ -10,6 +10,7 @@
     "run:one": "node src/index.js $DAY",
     "get:input": "sleep 30 && curl --cookie \"session=$SESSION\" https://adventofcode.com/$YEAR/day/$DAY/input > src/day.$DAY.input.txt"
   },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^27.0.3",
     "jest": "^27.4.0"
