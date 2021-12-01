@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 function parseInput() {
-  return fs.readFileSync("./day.8.input.txt", "utf-8");
+  return fs.readFileSync("src/day.8.input.txt", "utf-8");
 }
 
 function part1() {}
