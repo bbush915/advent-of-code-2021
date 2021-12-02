@@ -22,18 +22,18 @@ function part1() {
   let depth = 0;
 
   for (let i = 0; i < commands.length; i++) {
-    const command = commands[i];
+    const { direction, value } = commands[i];
 
-    if (command.direction === "forward") {
-      position += command.value;
+    if (direction === "forward") {
+      position += value;
     }
 
-    if (command.direction === "down") {
-      depth += command.value;
+    if (direction === "down") {
+      depth += value;
     }
 
-    if (command.direction === "up") {
-      depth -= command.value;
+    if (direction === "up") {
+      depth -= value;
     }
   }
 
@@ -48,19 +48,19 @@ function part2() {
   let aim = 0;
 
   for (let i = 0; i < commands.length; i++) {
-    const command = commands[i];
+    const { direction, value } = commands[i];
 
-    if (command.direction === "forward") {
-      position += command.value;
-      depth += aim * command.value;
+    if (direction === "forward") {
+      position += value;
+      depth += aim * value;
     }
 
-    if (command.direction === "down") {
-      aim += command.value;
+    if (direction === "down") {
+      aim += value;
     }
 
-    if (command.direction === "up") {
-      aim -= command.value;
+    if (direction === "up") {
+      aim -= value;
     }
   }
 
