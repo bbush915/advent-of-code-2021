@@ -21,9 +21,7 @@ function part1() {
   let position = 0;
   let depth = 0;
 
-  for (let i = 0; i < commands.length; i++) {
-    const { direction, value } = commands[i];
-
+  for (const { direction, value } of commands) {
     if (direction === "forward") {
       position += value;
     }
@@ -47,9 +45,7 @@ function part2() {
   let depth = 0;
   let aim = 0;
 
-  for (let i = 0; i < commands.length; i++) {
-    const { direction, value } = commands[i];
-
+  for (const { direction, value } of commands) {
     if (direction === "forward") {
       position += value;
       depth += aim * value;
