@@ -31,7 +31,7 @@ function part1() {
       { gammaBits: [], epsilonBits: [] }
     );
 
-  return parseInt(gammaBits.join(""), 2) * parseInt(epsilonBits.join(""), 2);
+  return parseBits(gammaBits) * parseBits(epsilonBits);
 }
 
 function part2() {
@@ -64,9 +64,13 @@ function getRating(diagnostics, invert) {
     possibilities = possibilities.filter((x) => x[i] === (oneMostCommon ? 1 : 0));
 
     if (possibilities.length === 1) {
-      return parseInt(possibilities[0].join(""), 2);
+      return parseBits(possibilities[0]);
     }
   }
+}
+
+function parseBits(bits) {
+  return parseInt(bits.join(""), 2);
 }
 
 module.exports.part1 = part1;
