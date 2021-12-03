@@ -23,8 +23,8 @@ function part1() {
       (rateBits, count) => {
         const oneMostCommon = count >= 500;
 
-        rateBits.gammaBits.push(oneMostCommon ? "1" : "0");
-        rateBits.epsilonBits.push(oneMostCommon ? "0" : "1");
+        rateBits.gammaBits.push(oneMostCommon ? 1 : 0);
+        rateBits.epsilonBits.push(oneMostCommon ? 0 : 1);
 
         return rateBits;
       },
@@ -64,7 +64,7 @@ function getRating(diagnostics, invert) {
     possibilities = possibilities.filter((x) => x[i] === (oneMostCommon ? 1 : 0));
 
     if (possibilities.length === 1) {
-      return parseInt(possibilities[0].map((x) => String(x)).join(""), 2);
+      return parseInt(possibilities[0].join(""), 2);
     }
   }
 }
