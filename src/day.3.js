@@ -47,15 +47,12 @@ function getRating(diagnostics, invert) {
   let possibilities = diagnostics.slice(0);
 
   for (let i = 0; i < 12; i++) {
-    const counts = possibilities.reduce((counts, diagnostic) => {
-      for (let i = 0; i < 12; i++) {
-        counts[i] += diagnostic[i];
-      }
+    const count = possibilities.reduce((count, diagnostic) => {
+      count += diagnostic[i];
+      return count;
+    }, 0);
 
-      return counts;
-    }, new Array(12).fill(0));
-
-    let oneMostCommon = counts[i] >= Math.floor(possibilities.length / 2);
+    let oneMostCommon = count >= possibilities.length / 2;
 
     if (invert) {
       oneMostCommon = !oneMostCommon;

@@ -29,10 +29,7 @@ function part1() {
             board[i][j] = null;
 
             if (checkWin(board)) {
-              const sum = board
-                .flatMap((x) => x)
-                .reduce((sum, val) => ((sum += val ? val : 0), sum), 0);
-
+              const sum = board.flatMap((x) => x).reduce((sum, val) => ((sum += val), sum), 0);
               return sum * number;
             }
           }
@@ -52,22 +49,19 @@ function part2() {
     for (let idx = 0; idx < boards.length; idx++) {
       const board = boards[idx];
 
+      if (hasBoardWon[idx]) {
+        continue;
+      }
+
       for (let i = 0; i < 5; i++) {
         for (let j = 0; j < 5; j++) {
           if (board[i][j] === number) {
             board[i][j] = null;
 
-            if (hasBoardWon[idx]) {
-              continue;
-            }
-
             if (checkWin(board)) {
               hasBoardWon[idx] = true;
 
-              const sum = board
-                .flatMap((x) => x)
-                .reduce((sum, val) => ((sum += val ? val : 0), sum), 0);
-
+              const sum = board.flatMap((x) => x).reduce((sum, val) => ((sum += val), sum), 0);
               lastScore = sum * number;
             }
           }
