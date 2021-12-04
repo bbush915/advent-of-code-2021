@@ -74,21 +74,34 @@ function part2() {
 }
 
 function checkWin(board) {
+  // NOTE - Check rows.
+
   for (let i = 0; i < 5; i++) {
-    let rowWin = true;
-    let columnWin = true;
+    let didWin = true;
 
     for (let j = 0; j < 5; j++) {
       if (board[i][j]) {
-        rowWin = false;
-      }
-
-      if (board[j][i]) {
-        columnWin = false;
+        didWin = false;
       }
     }
 
-    if (rowWin || columnWin) {
+    if (didWin) {
+      return true;
+    }
+  }
+
+  // NOTE - Check columns.
+
+  for (let i = 0; i < 5; i++) {
+    let didWin = true;
+
+    for (let j = 0; j < 5; j++) {
+      if (board[j][i]) {
+        didWin = false;
+      }
+    }
+
+    if (didWin) {
       return true;
     }
   }
