@@ -49,7 +49,7 @@ function part1() {
 function part2() {
   const lines = parseInput();
 
-  const grid = new Array(10);
+  const grid = new Array(1000);
 
   for (let i = 0; i < 1000; i++) {
     grid[i] = new Array(1000).fill(0);
