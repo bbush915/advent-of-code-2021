@@ -1,89 +1,105 @@
 const fs = require("fs");
 
+const { clone } = require("./utils/misc");
+
 function parseInput() {
   return fs
     .readFileSync("src/day.8.input.txt", "utf-8")
     .split("\n")
     .filter((x) => x)
     .map((x) => {
-      const parts = x.split(" | ");
+      const [signals, outputs] = x.split(" | ").map((x) =>
+        x.split(" ").map((x) =>
+          x
+            .split("")
+            .sort((x, y) => x.localeCompare(y))
+            .join("")
+        )
+      );
 
       return {
-        signals: parts[0].split(" ").map((x) => x.split("").sort((x, y) => x.localeCompare(y))),
-        outputs: parts[1].split(" ").map((x) => x.split("").sort((x, y) => x.localeCompare(y))),
+        signals,
+        outputs,
       };
     });
 }
 
 function part1() {
-  const input = parseInput();
+  const displays = parseInput();
 
-  // return input.reduce(
-  //   (sum, { outputs }) => (sum += outputs.filter((x) => [2, 3, 4, 7].includes(x.length)).length),
-  //   0
-  // );
+  return displays.reduce(
+    (sum, { outputs }) => (sum += outputs.filter((x) => [2, 3, 4, 7].includes(x.length)).length),
+    0
+  );
 }
 
 function part2() {
-  const input = parseInput();
-
-  return input.reduce((sum, value) => (sum += getDigits(value)), 0);
+  const displays = parseInput();
+  return displays.reduce((sum, display) => (sum += getOutputValue(display)), 0);
 }
 
-function getDigits({ signals, outputs }) {
-  const mapping = new Array(10);
+function getOutputValue({ signals, outputs }) {
+  const digitMapping = new Array(10);
 
-  const clone = signals.slice(0);
+  const possibilities = clone(signals);
 
-  let index = clone.findIndex((x) => x.length === 2);
-  mapping[1] = clone.splice(index, 1)[0];
+  let index;
 
-  index = clone.findIndex((x) => x.length === 4);
-  mapping[4] = clone.splice(index, 1)[0];
+  // NOTE - Unique length
 
-  index = clone.findIndex((x) => x.length === 3);
-  mapping[7] = clone.splice(index, 1)[0];
+  index = possibilities.findIndex((x) => x.length === 2);
+  digitMapping[1] = possibilities.splice(index, 1)[0];
 
-  index = clone.findIndex((x) => x.length === 7);
-  mapping[8] = clone.splice(index, 1)[0];
+  index = possibilities.findIndex((x) => x.length === 4);
+  digitMapping[4] = possibilities.splice(index, 1)[0];
 
-  index = clone.findIndex((x) => x.length === 5 && mapping[1].every((y) => x.includes(y)));
-  mapping[3] = clone.splice(index, 1)[0];
+  index = possibilities.findIndex((x) => x.length === 3);
+  digitMapping[7] = possibilities.splice(index, 1)[0];
 
-  index = clone.findIndex(
-    (x) => x.length === 5 && mapping[4].filter((y) => x.includes(y)).length === 2
+  index = possibilities.findIndex((x) => x.length === 7);
+  digitMapping[8] = possibilities.splice(index, 1)[0];
+
+  // NOTE - 3 is the only 5 segment number that overlaps with 1.
+
+  index = possibilities.findIndex((x) => x.length === 5 && countOverlap(digitMapping[1], x) === 2);
+  digitMapping[3] = possibilities.splice(index, 1)[0];
+
+  // NOTE - 2 and 5 are 5 segment numbers that will have a different number of
+  // overlapping segments with 4.
+
+  index = possibilities.findIndex((x) => x.length === 5 && countOverlap(digitMapping[4], x) === 2);
+  digitMapping[2] = possibilities.splice(index, 1)[0];
+
+  index = possibilities.findIndex((x) => x.length === 5 && countOverlap(digitMapping[4], x) === 3);
+  digitMapping[5] = possibilities.splice(index, 1)[0];
+
+  // NOTE - 9 is the only 6 segment number that overlaps with 4.
+
+  index = possibilities.findIndex((x) => x.length === 6 && countOverlap(digitMapping[4], x) === 4);
+  digitMapping[9] = possibilities.splice(index, 1)[0];
+
+  // NOTE - 6 is the only 6 segment number that overlaps with 5.
+
+  index = possibilities.findIndex((x) => x.length === 6 && countOverlap(digitMapping[5], x) === 5);
+  digitMapping[6] = possibilities.splice(index, 1)[0];
+
+  // NOTE - Last possibility is 0.
+
+  digitMapping[0] = possibilities[0];
+
+  // NOTE - Calculate output value.
+
+  return parseInt(
+    outputs.map((x) => Object.entries(digitMapping).find((y) => y[1] === x)[0]).join(""),
+    10
   );
-  mapping[2] = clone.splice(index, 1)[0];
+}
 
-  index = clone.findIndex(
-    (x) => x.length === 5 && mapping[4].filter((y) => x.includes(y)).length === 3
-  );
-  mapping[5] = clone.splice(index, 1)[0];
+function countOverlap(x, y) {
+  const xParts = x.split("");
+  const yParts = y.split("");
 
-  index = clone.findIndex(
-    (x) => x.length === 6 && mapping[4].filter((y) => x.includes(y)).length === 4
-  );
-  mapping[9] = clone.splice(index, 1)[0];
-
-  index = clone.findIndex(
-    (x) => x.length === 6 && mapping[5].filter((y) => x.includes(y)).length === 5
-  );
-  mapping[6] = clone.splice(index, 1)[0];
-
-  mapping[0] = clone[0];
-
-  const blah = outputs
-    .map(
-      (x) =>
-        Object.entries(mapping).find(
-          (y) => y[1].length === x.length && y[1].every((z) => x.includes(z))
-        )[0]
-    )
-    .join("");
-
-  const result = parseInt(blah, 10);
-
-  return result;
+  return xParts.filter((x) => yParts.includes(x)).length;
 }
 
 module.exports.part1 = part1;
