@@ -124,12 +124,12 @@ function propagateFlash(energyLevels, x, y) {
   }
 }
 
-function getEnergyLevel(input, x, y) {
-  if (x < 0 || x >= input.length || y < 0 || y >= input[x].length) {
+function getEnergyLevel(energyLevels, x, y) {
+  if (x < 0 || x >= energyLevels.length || y < 0 || y >= energyLevels[x].length) {
     return null;
   }
 
-  return input[x][y];
+  return energyLevels[x][y];
 }
 
 module.exports.part1 = part1;
