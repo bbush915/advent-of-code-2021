@@ -9,17 +9,17 @@ function parseInput() {
 }
 
 function part1() {
-  const tranmission = parseInput();
+  const transmission = parseInput();
 
-  const { packet } = consumePacket(tranmission);
+  const { packet } = consumePacket(transmission);
 
   return sumVersions([packet]);
 }
 
 function part2() {
-  const tranmission = parseInput();
+  const transmission = parseInput();
 
-  const { packet } = consumePacket(tranmission);
+  const { packet } = consumePacket(transmission);
 
   return evaluatePacket(packet);
 }
