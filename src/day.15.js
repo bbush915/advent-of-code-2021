@@ -21,14 +21,14 @@ function part2() {
   const expandedRiskLevels = new Array(5 * riskLevels.length);
 
   for (let i = 0; i < expandedRiskLevels.length; i++) {
-    expandedRiskLevels[i] = new Array(5 * riskLevels[0].length);
+    expandedRiskLevels[i] = new Array(5 * riskLevels.length);
   }
 
   for (let i = 0; i < riskLevels.length; i++) {
-    for (let j = 0; j < riskLevels[i].length; j++) {
+    for (let j = 0; j < riskLevels.length; j++) {
       for (let x = 0; x < 5; x++) {
         for (let y = 0; y < 5; y++) {
-          expandedRiskLevels[i + x * riskLevels.length][j + y * riskLevels[i].length] =
+          expandedRiskLevels[i + x * riskLevels.length][j + y * riskLevels.length] =
             ((riskLevels[i][j] + x + y - 1) % 9) + 1;
         }
       }
