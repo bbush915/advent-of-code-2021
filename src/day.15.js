@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const { clone } = require("../src/utils/misc");
+const { dijkstra } = require("./utils/algorithms");
 
 function parseInput() {
   return fs
@@ -11,111 +11,92 @@ function parseInput() {
 }
 
 function part1() {
-  const input = parseInput();
+  const riskLevels = parseInput();
+  return getTotalRiskLevel(riskLevels);
+}
 
-  const expandedInput = new Array(5 * input.length);
+function part2() {
+  const riskLevels = parseInput();
 
-  for (let i = 0; i < expandedInput.length; i++) {
-    expandedInput[i] = new Array(5 * input[0].length);
+  const expandedRiskLevels = new Array(5 * riskLevels.length);
+
+  for (let i = 0; i < expandedRiskLevels.length; i++) {
+    expandedRiskLevels[i] = new Array(5 * riskLevels[0].length);
   }
 
-  for (let i = 0; i < input.length; i++) {
-    for (let j = 0; j < input[i].length; j++) {
+  for (let i = 0; i < riskLevels.length; i++) {
+    for (let j = 0; j < riskLevels[i].length; j++) {
       for (let x = 0; x < 5; x++) {
         for (let y = 0; y < 5; y++) {
-          expandedInput[i + x * input.length][j + y * input[i].length] =
-            ((input[i][j] + x + y - 1) % 9) + 1;
+          expandedRiskLevels[i + x * riskLevels.length][j + y * riskLevels[i].length] =
+            ((riskLevels[i][j] + x + y - 1) % 9) + 1;
         }
       }
     }
   }
 
-  const distances = {};
-  distances[`0|0`] = 0;
-
-  const previous = {};
-
-  const priority = [];
-
-  for (let i = 0; i < expandedInput.length; i++) {
-    for (let j = 0; j < expandedInput[i].length; j++) {
-      const key = `${i}|${j}`;
-
-      if (i !== 0 || j !== 0) {
-        distances[key] = Number.MAX_SAFE_INTEGER;
-        previous[key] = undefined;
-      }
-
-      priority.push([key, distances[key]]);
-    }
-  }
-
-  while (priority.length > 0) {
-    console.log(priority.length);
-    priority.sort((x, y) => y[1] - x[1]);
-
-    const [key, distance] = priority.pop();
-
-    const [i, j] = key.split("|").map(Number);
-
-    let alt = 0;
-
-    // Right
-    if (j < expandedInput[i].length - 1) {
-      const neighborKey = `${i}|${j + 1}`;
-      alt = distance + expandedInput[i][j + 1];
-
-      if (alt < distances[neighborKey]) {
-        distances[neighborKey] = alt;
-        previous[neighborKey] = key;
-
-        priority.find((x) => x[0] === neighborKey)[1] = alt;
-      }
-    }
-
-    // Left
-    if (j > 0) {
-      const neighborKey = `${i}|${j - 1}`;
-      alt = distance + expandedInput[i][j - 1];
-
-      if (alt < distances[neighborKey]) {
-        distances[neighborKey] = alt;
-        previous[neighborKey] = key;
-
-        priority.find((x) => x[0] === neighborKey)[1] = alt;
-      }
-    }
-    // Down
-    if (i < expandedInput.length - 1) {
-      const neighborKey = `${i + 1}|${j}`;
-      alt = distances[key] + expandedInput[i + 1][j];
-
-      if (alt < distances[neighborKey]) {
-        distances[neighborKey] = alt;
-        previous[neighborKey] = key;
-
-        priority.find((x) => x[0] === neighborKey)[1] = alt;
-      }
-    }
-
-    // Up
-    if (i > 0) {
-      const neighborKey = `${i - 1}|${j}`;
-      alt = distances[key] + expandedInput[i - 1][j];
-
-      if (alt < distances[neighborKey]) {
-        distances[neighborKey] = alt;
-        previous[neighborKey] = key;
-
-        priority.find((x) => x[0] === neighborKey)[1] = alt;
-      }
-    }
-  }
-
-  return distances[`${expandedInput.length - 1}|${expandedInput[0].length - 1}`];
+  return getTotalRiskLevel(expandedRiskLevels);
 }
 
-function part2() {}
+function getTotalRiskLevel(riskLevels) {
+  const graph = {
+    getNeighbors: curryGetNeighbors(riskLevels),
+    getDistance: curryGetDistance(riskLevels),
+  };
+
+  const source = getKey(0, 0);
+  const target = getKey(riskLevels.length - 1, riskLevels.length - 1);
+
+  const { distanceLookup } = dijkstra(graph, source, target);
+
+  return distanceLookup.get(target);
+}
+
+function curryGetNeighbors(riskLevels) {
+  return function getNeighbors(key) {
+    const [i, j] = key.split("|").map(Number);
+
+    const neighbors = [];
+
+    // NOTE - Top
+
+    if (i > 0) {
+      neighbors.push(getKey(i - 1, j));
+    }
+
+    // NOTE - Right
+
+    if (j < riskLevels.length - 1) {
+      neighbors.push(getKey(i, j + 1));
+    }
+
+    // NOTE - Bottom
+
+    if (i < riskLevels.length - 1) {
+      neighbors.push(getKey(i + 1, j));
+    }
+
+    // NOTE - Left
+
+    if (j > 0) {
+      neighbors.push(getKey(i, j - 1));
+    }
+
+    return neighbors;
+  };
+}
+
+function curryGetDistance(riskLevels) {
+  return function getDistance(_u, v) {
+    const [i, j] = v.split("|").map(Number);
+
+    return riskLevels[i][j];
+  };
+}
+
+function getKey(i, j) {
+  return `${i}|${j}`;
+}
 
 module.exports.part1 = part1;
 module.exports.part2 = part2;
