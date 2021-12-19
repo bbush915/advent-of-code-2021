@@ -1,24 +1,18 @@
 const fs = require("fs");
 
-const { clone } = require("../src/utils/misc");
-
 function parseInput() {
   const parts = fs.readFileSync("src/day.14.input.txt", "utf-8").split("\n\n");
 
-  const template = parts[0].split("");
+  const template = parts[0];
 
   const rules = parts[1]
     .split("\n")
     .filter((x) => x)
     .map((x) => x.split(" -> "))
     .reduce((rules, [pair, insertion]) => {
-      rules[pair] = {
-        insertion,
-        counts: getCounts(insertion.split("")),
-      };
-
+      rules.set(pair, insertion);
       return rules;
-    }, {});
+    }, new Map());
 
   return {
     template,
@@ -27,102 +21,48 @@ function parseInput() {
 }
 
 function part1() {
-  return getDifference(4);
+  return getDifference(10);
 }
 
 function part2() {
-  return getDifference(6);
+  return getDifference(40);
 }
 
-function getDifference(depth) {
+function getDifference(maxSteps) {
   const { template, rules } = parseInput();
 
-  const iteratedRuleCounts = getIteratedRuleCounts(rules, depth);
+  const elementCounts = new Map();
 
-  const counts = getCounts(template);
+  for (const element of template) {
+    elementCounts.set(element, (elementCounts.get(element) || 0) + 1);
+  }
+
+  let pairCounts = new Map();
 
   for (let i = 0; i < template.length - 1; i++) {
-    const pair = template[i] + template[i + 1];
-
-    if (iteratedRuleCounts[pair]) {
-      mergeCounts(counts, iteratedRuleCounts[pair]);
-    }
+    const key = template[i] + template[i + 1];
+    pairCounts.set(key, (pairCounts.get(key) || 0) + 1);
   }
 
-  const sorted = Object.values(counts).sort((x, y) => x - y);
+  for (let step = 0; step < maxSteps; step++) {
+    const newPairCounts = new Map();
 
-  return sorted[sorted.length - 1] - sorted[0];
-}
+    for (const [key, value] of pairCounts) {
+      const insertion = rules.get(key);
+      elementCounts.set(insertion, (elementCounts.get(insertion) || 0) + value);
 
-function getIteratedRuleCounts(rules, depth) {
-  let iteratedRules = clone(rules);
+      const leftKey = key[0] + insertion;
+      newPairCounts.set(leftKey, (newPairCounts.get(leftKey) || 0) + value);
 
-  for (let iteration = 0; iteration < depth; iteration++) {
-    const nextIteratedRules = {};
-
-    for (const [pair, { insertion, counts }] of Object.entries(iteratedRules)) {
-      const newInsertion = insertion.split("");
-
-      newInsertion.splice(0, 0, pair[0]);
-      newInsertion.splice(newInsertion.length, 0, pair[1]);
-
-      const newCounts = clone(counts);
-
-      const insertions = [];
-
-      for (let i = 0; i < newInsertion.length - 1; i++) {
-        const pair = newInsertion[i] + newInsertion[i + 1];
-
-        if (iteratedRules[pair]) {
-          insertions.push([i + 1, iteration === 2 ? rules[pair] : iteratedRules[pair]]);
-        }
-      }
-
-      for (const [index, { insertion, counts }] of insertions.reverse()) {
-        if (iteration < depth - 1) {
-          newInsertion.splice(index, 0, insertion);
-        }
-
-        mergeCounts(newCounts, counts);
-      }
-
-      nextIteratedRules[pair] = {
-        insertion: newInsertion.slice(1, newInsertion.length - 1).join(""),
-        counts: newCounts,
-      };
+      const rightKey = insertion + key[1];
+      newPairCounts.set(rightKey, (newPairCounts.get(rightKey) || 0) + value);
     }
 
-    iteratedRules = nextIteratedRules;
+    pairCounts = newPairCounts;
   }
 
-  return Object.entries(iteratedRules).reduce((iteratedRuleCounts, [pair, { counts }]) => {
-    iteratedRuleCounts[pair] = counts;
-    return iteratedRuleCounts;
-  }, {});
-}
-
-function getCounts(value) {
-  return value.reduce((counts, element) => {
-    if (!counts[element]) {
-      counts[element] = 0;
-    }
-
-    counts[element]++;
-
-    return counts;
-  }, {});
-}
-
-function mergeCounts(x, y) {
-  return Object.entries(y).reduce((counts, [element, count]) => {
-    if (!counts[element]) {
-      counts[element] = 0;
-    }
-
-    counts[element] += count;
-
-    return counts;
-  }, x);
+  const sortedElementCounts = Array.from(elementCounts.values()).sort((x, y) => x - y);
+  return sortedElementCounts[sortedElementCounts.length - 1] - sortedElementCounts[0];
 }
 
 module.exports.part1 = part1;
