@@ -1,33 +1,34 @@
 const fs = require("fs");
 
+const { clone, isNumeric } = require("./utils/misc");
+
 function parseInput() {
   return fs
     .readFileSync("src/day.18.input.txt", "utf-8")
     .split("\n")
     .filter((x) => x)
-    .map(makeTree);
+    .map(buildSnailfishNumber);
 }
 
-function makeTree(value, parent, side) {
-  if (isNaN(value)) {
-    const tree = {
-      parent: parent || null,
-      side: side || null,
-      value: null,
+function buildSnailfishNumber(value) {
+  if (isNumeric(value)) {
+    return {
+      left: null,
+      right: null,
+      value: Number(value),
     };
-
-    const { left, right } = getParts(value);
-
-    tree.left = makeTree(left, tree, "L");
-    tree.right = makeTree(right, tree, "R");
-
-    return tree;
-  } else {
-    return buildLeaf(Number(value), parent, side);
   }
+
+  const { left, right } = splitPair(value);
+
+  return {
+    left: buildSnailfishNumber(left),
+    right: buildSnailfishNumber(right),
+    value: null,
+  };
 }
 
-function getParts(value) {
+function splitPair(value) {
   const trimmedValue = value.slice(1, -1);
 
   let count = 0;
@@ -50,110 +51,142 @@ function getParts(value) {
   }
 }
 
-function buildLeaf(value, parent, side) {
-  return {
-    parent,
-    left: null,
-    right: null,
-    side,
-    value,
-  };
+function part1() {
+  const snailfishNumbers = parseInput();
+
+  const finalSum = snailfishNumbers
+    .slice(1)
+    .reduce((currentSum, snailfishNumber) => add(currentSum, snailfishNumber), snailfishNumbers[0]);
+
+  return magnitude(finalSum);
 }
 
-function part1() {
-  const input = parseInput();
+function part2() {
+  const snailfishNumbers = parseInput();
 
-  const sum = input.slice(1).reduce((sum, number) => {
-    const newSum = {
-      parent: null,
-      side: null,
-      value: null,
-    };
+  let maxMagnitude = 0;
 
-    sum.parent = newSum;
-    sum.side = "L";
-    newSum.left = sum;
+  for (let i = 0; i < snailfishNumbers.length; i++) {
+    for (let j = i + 1; j < snailfishNumbers.length; j++) {
+      const magnitude1 = magnitude(add(snailfishNumbers[i], snailfishNumbers[j]));
 
-    number.parent = newSum;
-    number.side = "R";
-    newSum.right = number;
-
-    let shouldReduce = true;
-
-    while (shouldReduce) {
-      // NOTE - Handle explosions.
-
-      if (explode(newSum)) {
-        continue;
+      if (magnitude1 > maxMagnitude) {
+        maxMagnitude = magnitude1;
       }
 
-      // NOTE - Handle split.
+      const magnitude2 = magnitude(add(snailfishNumbers[j], snailfishNumbers[i]));
 
-      if (split(newSum)) {
-        continue;
+      if (magnitude2 > maxMagnitude) {
+        maxMagnitude = magnitude2;
       }
+    }
+  }
 
-      shouldReduce = false;
+  return maxMagnitude;
+}
+
+function add(x, y) {
+  const sum = {
+    left: clone(x),
+    right: clone(y),
+    value: null,
+  };
+
+  return reduce(sum);
+}
+
+function reduce(snailfishNumber) {
+  let shouldReduce = true;
+
+  while (shouldReduce) {
+    if (explode(snailfishNumber, snailfishNumber)) {
+      continue;
     }
 
-    return newSum;
-  }, input[0]);
+    if (split(snailfishNumber)) {
+      continue;
+    }
 
-  return magnitude(sum);
+    shouldReduce = false;
+  }
+
+  return snailfishNumber;
 }
 
-function explode(element, depth = 0) {
+function explode(snailfishNumber, element, depth = 0) {
   if (element.value !== null) {
     return false;
   }
 
   if (depth > 3) {
     const leftValue = element.left.value;
-    updateValue(element.left, leftValue);
-
     const rightValue = element.right.value;
-    updateValue(element.right, rightValue);
 
-    if (element.side === "L") {
-      element.value = 0;
-      element.left = null;
-      element.right = null;
+    element.left = null;
+    element.right = null;
+    element.value = 0;
+
+    const { left, right } = getNeighbors(snailfishNumber, element);
+
+    if (left) {
+      left.value += leftValue;
     }
 
-    if (element.side === "R") {
-      element.value = 0;
-      element.left = null;
-      element.right = null;
+    if (right) {
+      right.value += rightValue;
     }
 
     return true;
   }
 
-  return explode(element.left, depth + 1) || explode(element.right, depth + 1);
+  return (
+    explode(snailfishNumber, element.left, depth + 1) ||
+    explode(snailfishNumber, element.right, depth + 1)
+  );
+}
+
+function getNeighbors(snailfishNumber, element) {
+  const values = [];
+  getNeighborsHelper(snailfishNumber, element, values);
+
+  const index = values.findIndex((x) => x === element);
+
+  return {
+    left: values[index - 1],
+    right: values[index + 1],
+  };
+}
+
+function getNeighborsHelper(current, element, values) {
+  if (current === null) {
+    return;
+  }
+
+  getNeighborsHelper(current.left, element, values);
+
+  if (current.value !== null) {
+    values.push(current);
+  }
+
+  getNeighborsHelper(current.right, element, values);
 }
 
 function split(element) {
   if (element.value !== null) {
     if (element.value > 9) {
-      const leftValue = Math.floor(element.value / 2);
-      const rightValue = Math.ceil(element.value / 2);
-
-      const node = {
-        parent: element.parent,
-        side: element.side,
-        value: null,
+      element.left = {
+        left: null,
+        right: null,
+        value: Math.floor(element.value / 2),
       };
 
-      node.left = buildLeaf(leftValue, node, "L");
-      node.right = buildLeaf(rightValue, node, "R");
+      element.right = {
+        left: null,
+        right: null,
+        value: Math.ceil(element.value / 2),
+      };
 
-      if (element.side === "L") {
-        element.parent.left = node;
-      }
-
-      if (element.side === "R") {
-        element.parent.right = node;
-      }
+      element.value = null;
 
       return true;
     }
@@ -164,132 +197,12 @@ function split(element) {
   return split(element.left) || split(element.right);
 }
 
-function updateValue(element, value) {
-  let current = element;
-
-  while (true) {
-    if (current.side !== (current.parent.side || current.side)) {
-      break;
-    }
-
-    current = current.parent;
-
-    if (!current.parent) {
-      return;
-    }
-  }
-
-  if (current.side === "L") {
-    const first = getLastElement(current.parent.parent.left);
-    first.value += value;
-  }
-
-  if (current.side === "R") {
-    const last = getFirstElement(current.parent.parent.right);
-    last.value += value;
-  }
-}
-
-function getFirstElement(root) {
-  let current = root;
-
-  while (current.value === null) {
-    current = current.left;
-  }
-
-  return current;
-}
-
-function getLastElement(root) {
-  let current = root;
-
-  while (current.value === null) {
-    current = current.right;
-  }
-
-  return current;
-}
-
-function print(root) {
-  if (root.value !== null) {
-    return root.value;
-  }
-
-  return `[${print(root.left)},${print(root.right)}]`;
-}
-
 function magnitude(element) {
   if (element.value !== null) {
     return element.value;
   }
 
   return 3 * magnitude(element.left) + 2 * magnitude(element.right);
-}
-
-function part2() {
-  const input = parseInput();
-
-  let max = 0;
-
-  for (let i = 0; i < input.length; i++) {
-    for (let j = 0; j < input.length; j++) {
-      const newInput = parseInput();
-
-      if (i === j) {
-        continue;
-      }
-
-      const one = calculateSum(newInput[i], newInput[j]);
-
-      if (one > max) {
-        max = one;
-      }
-      const newInput2 = parseInput();
-      const two = calculateSum(newInput2[j], newInput2[i]);
-
-      if (two > max) {
-        max = two;
-      }
-    }
-  }
-
-  return max;
-}
-
-function calculateSum(x, y) {
-  const newSum = {
-    parent: null,
-    side: null,
-    value: null,
-  };
-
-  x.parent = newSum;
-  x.side = "L";
-  newSum.left = x;
-
-  y.parent = newSum;
-  y.side = "R";
-  newSum.right = y;
-
-  let shouldReduce = true;
-
-  while (shouldReduce) {
-    // NOTE - Handle explosions.
-
-    if (explode(newSum)) {
-      continue;
-    }
-
-    // NOTE - Handle split.
-
-    if (split(newSum)) {
-      continue;
-    }
-
-    shouldReduce = false;
-  }
-
-  return magnitude(newSum);
 }
 
 module.exports.part1 = part1;
