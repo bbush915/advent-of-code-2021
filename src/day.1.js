@@ -5,7 +5,7 @@ function parseInput() {
     .readFileSync("src/day.1.input.txt", "utf-8")
     .split("\n")
     .filter((x) => x)
-    .map((x) => Number(x));
+    .map(Number);
 }
 
 function part1() {

@@ -13,7 +13,7 @@ function part1() {
 
   const { packet } = consumePacket(transmission);
 
-  return sumVersions([packet]);
+  return sumVersions(packet);
 }
 
 function part2() {
@@ -119,14 +119,12 @@ function getValue(bits) {
   return parseInt(bits.join(""), 2);
 }
 
-function sumVersions(packets) {
-  let sum = 0;
+function sumVersions(packet) {
+  let sum = packet.version;
 
-  for (const packet of packets) {
-    sum += packet.version;
-
-    if (packet.subpackets) {
-      sum += sumVersions(packet.subpackets);
+  if (packet.subpackets) {
+    for (const subpacket of packet.subpackets) {
+      sum += sumVersions(subpacket);
     }
   }
 

@@ -1,16 +1,16 @@
 const fs = require("fs");
 
 function parseInput() {
-  const input = fs
-    .readFileSync("src/day.4.input.txt", "utf-8")
-    .split("\n\n")
-    .filter((x) => x);
+  const input = fs.readFileSync("src/day.4.input.txt", "utf-8").split("\n\n");
 
-  const numbers = input[0].split(",").map((x) => Number(x));
+  const numbers = input[0].split(",").map(Number);
 
-  const boards = input
-    .slice(1)
-    .map((x) => x.split("\n").map((x) => x.split(/\s+/).map((x) => Number(x))));
+  const boards = input.slice(1).map((x) =>
+    x
+      .split("\n")
+      .filter((x) => x)
+      .map((x) => x.split(/\s+/).map(Number))
+  );
 
   return {
     numbers,
@@ -29,7 +29,7 @@ function part1() {
             board[i][j] = null;
 
             if (checkWin(board)) {
-              const sum = board.flatMap((x) => x).reduce((sum, val) => ((sum += val), sum), 0);
+              const sum = board.flatMap((x) => x).reduce((sum, val) => (sum += val), 0);
               return sum * number;
             }
           }
@@ -46,10 +46,10 @@ function part2() {
   let lastScore = 0;
 
   for (const number of numbers) {
-    for (let idx = 0; idx < boards.length; idx++) {
-      const board = boards[idx];
+    for (let n = 0; n < boards.length; n++) {
+      const board = boards[n];
 
-      if (hasBoardWon[idx]) {
+      if (hasBoardWon[n]) {
         continue;
       }
 
@@ -59,9 +59,9 @@ function part2() {
             board[i][j] = null;
 
             if (checkWin(board)) {
-              hasBoardWon[idx] = true;
+              hasBoardWon[n] = true;
 
-              const sum = board.flatMap((x) => x).reduce((sum, val) => ((sum += val), sum), 0);
+              const sum = board.flatMap((x) => x).reduce((sum, val) => (sum += val), 0);
               lastScore = sum * number;
             }
           }

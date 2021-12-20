@@ -6,7 +6,7 @@ function parseInput() {
     .split("\n")
     .filter((x) => x)
     .map((x) => {
-      const parts = x.split(" -> ").flatMap((x) => x.split(",").map((x) => Number(x)));
+      const parts = x.split(" -> ").flatMap((x) => x.split(",").map(Number));
 
       return {
         x1: parts[0],

@@ -1,11 +1,13 @@
 const fs = require("fs");
 
+const { clone } = require("./utils/misc");
+
 function parseInput() {
   return fs
     .readFileSync("src/day.3.input.txt", "utf-8")
     .split("\n")
     .filter((x) => x)
-    .map((x) => x.split("").map((x) => Number(x)));
+    .map((x) => x.split("").map(Number));
 }
 
 function part1() {
@@ -44,13 +46,10 @@ function part2() {
 }
 
 function getRating(diagnostics, invert) {
-  let possibilities = diagnostics.slice(0);
+  let possibilities = clone(diagnostics);
 
   for (let i = 0; i < 12; i++) {
-    const count = possibilities.reduce((count, diagnostic) => {
-      count += diagnostic[i];
-      return count;
-    }, 0);
+    const count = possibilities.reduce((count, diagnostic) => (count += diagnostic[i]), 0);
 
     let oneMostCommon = count >= possibilities.length / 2;
 
