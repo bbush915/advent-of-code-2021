@@ -2,6 +2,16 @@ const fs = require("fs");
 
 const { clone } = require("./utils/misc");
 
+const DIRAC_COUNTS = {
+  3: 1,
+  4: 3,
+  5: 6,
+  6: 7,
+  7: 6,
+  8: 3,
+  9: 1,
+};
+
 function parseInput() {
   return fs
     .readFileSync("src/day.21.input.txt", "utf-8")
@@ -14,22 +24,22 @@ function part1() {
   const positions = parseInput();
   const scores = [0, 0];
 
-  let turn = 0;
-
   let die = 1;
-  let count = 0;
+  let rolls = 0;
+
+  let turn = 0;
 
   while (Math.max(...scores) < 1000) {
     positions[turn] = ((positions[turn] + 3 * die + 2) % 10) + 1;
     scores[turn] += positions[turn];
 
     die = ((die + 2) % 100) + 1;
-    count += 3;
+    rolls += 3;
 
     turn = 1 - turn;
   }
 
-  return Math.min(...scores) * count;
+  return Math.min(...scores) * rolls;
 }
 
 function part2() {
@@ -41,20 +51,10 @@ function part2() {
   return Math.max(...wins);
 }
 
-const DIRAC_COUNTS = {
-  3: 1,
-  4: 3,
-  5: 6,
-  6: 7,
-  7: 6,
-  8: 3,
-  9: 1,
-};
-
-function playTurn(positions, scores, turn, count, wins) {
+function playTurn(positions, scores, turn, outerCount, wins) {
   if (Math.max(...scores) >= 21) {
-    wins[0] += scores[0] >= 21 ? count : 0;
-    wins[1] += scores[1] >= 21 ? count : 0;
+    wins[0] += scores[0] >= 21 ? outerCount : 0;
+    wins[1] += scores[1] >= 21 ? outerCount : 0;
 
     return;
   }
@@ -66,7 +66,7 @@ function playTurn(positions, scores, turn, count, wins) {
     newPositions[turn] = ((newPositions[turn] + Number(move) - 1) % 10) + 1;
     newScores[turn] += newPositions[turn];
 
-    playTurn(newPositions, newScores, 1 - turn, count * innerCount, wins);
+    playTurn(newPositions, newScores, 1 - turn, innerCount * outerCount, wins);
   }
 }
 
