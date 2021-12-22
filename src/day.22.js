@@ -93,8 +93,6 @@ function part2() {
     }
   }
 
-  //2758514936282235
-
   return cuboids.reduce((sum, cuboid) => (sum += volume(cuboid)), 0);
 }
 
