@@ -148,10 +148,25 @@ function getMinimumEnergy(
   const stack = [];
   const history = [];
 
+  let stack0 = 0;
+  let stack1 = 0;
+  let stack2 = 0;
+
   let currentEnergy = 0;
   let minimumEnergy = initialMinimumEnergy;
 
   mainLoop: while (1) {
+    const newStack0 = stack[0] ? stack[0].length : 0;
+    const newStack1 = stack[1] ? stack[1].length : 0;
+    const newStack2 = stack[2] ? stack[2].length : 0;
+
+    if (newStack0 !== stack0 || newStack1 !== stack1 || newStack2 !== stack2) {
+      console.log("Stack: " + newStack0 + " | " + newStack1 + " | " + newStack2);
+      stack0 = newStack0;
+      stack1 = newStack1;
+      stack2 = newStack2;
+    }
+
     if (isOrganized(diagram) && currentEnergy < minimumEnergy) {
       minimumEnergy = currentEnergy;
       console.debug(minimumEnergy);
@@ -388,20 +403,18 @@ function getMinimumRequiredEnergy(diagram) {
     }
 
     const amphipodType = Object.entries(LOCATION_MAP).find((x) => x[1] === location)[0];
-    const locationAmphipods = amphipods.filter((x) => x.type === amphipodType);
+    const locationAmphipods = amphipods.filter(
+      (x) => x.type === amphipodType && x.location !== location
+    );
 
-    for (const amphipod of locationAmphipods) {
-      if (amphipod.location === LOCATION_MAP[amphipodType]) {
+    for (let position = 0; position < diagram[location].length; position++) {
+      if (diagram[location][position] === amphipodType) {
         continue;
       }
 
-      const firstOpenPosition = diagram[location]
-        .slice(0)
-        .reverse()
-        .findIndex((x) => x !== amphipodType);
+      const amphipod = locationAmphipods.pop();
 
-      const energy =
-        getDistance(amphipod, { location, position: firstOpenPosition }) * ENERGY_MAP[amphipodType];
+      const energy = getDistance(amphipod, { location, position }) * ENERGY_MAP[amphipodType];
 
       minimumRequiredEnergy += energy;
     }
