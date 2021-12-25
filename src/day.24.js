@@ -4,13 +4,7 @@ function parseInput() {
   return fs.readFileSync("src/day.24.input.txt", "utf-8");
 }
 
-function part1() {
-  const input = parseInput();
-
-  console.log(input);
-
-  return 0;
-}
+function part1() {}
 
 function part2() {}
 

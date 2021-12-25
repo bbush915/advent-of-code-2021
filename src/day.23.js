@@ -148,25 +148,10 @@ function getMinimumEnergy(
   const stack = [];
   const history = [];
 
-  let stack0 = 0;
-  let stack1 = 0;
-  let stack2 = 0;
-
   let currentEnergy = 0;
   let minimumEnergy = initialMinimumEnergy;
 
   mainLoop: while (1) {
-    const newStack0 = stack[0] ? stack[0].length : 0;
-    const newStack1 = stack[1] ? stack[1].length : 0;
-    const newStack2 = stack[2] ? stack[2].length : 0;
-
-    if (newStack0 !== stack0 || newStack1 !== stack1 || newStack2 !== stack2) {
-      console.log("Stack: " + newStack0 + " | " + newStack1 + " | " + newStack2);
-      stack0 = newStack0;
-      stack1 = newStack1;
-      stack2 = newStack2;
-    }
-
     if (isOrganized(diagram) && currentEnergy < minimumEnergy) {
       minimumEnergy = currentEnergy;
       console.debug(minimumEnergy);
@@ -185,7 +170,7 @@ function getMinimumEnergy(
         const previousMove = history.pop();
         previousMove.mirror = !previousMove.mirror;
 
-        executedMove(diagram, previousMove);
+        executeMove(diagram, previousMove);
 
         currentEnergy -= getEnergy(previousMove);
 
@@ -206,7 +191,7 @@ function getMinimumEnergy(
     const move = possibleMoves.pop();
     history.push(move);
 
-    executedMove(diagram, move);
+    executeMove(diagram, move);
 
     currentEnergy += getEnergy(move);
   }
@@ -242,7 +227,7 @@ function getPossibleMoves(diagram, permissibleMoves, currentEnergy, minimumEnerg
         const moveContext = { amphipod, move, mirror: false };
 
         const moveDiagram = clone(diagram);
-        executedMove(moveDiagram, moveContext);
+        executeMove(moveDiagram, moveContext);
 
         const totalEnergy =
           currentEnergy + getEnergy(moveContext) + getMinimumRequiredEnergy(moveDiagram);
@@ -260,7 +245,7 @@ function getPossibleMoves(diagram, permissibleMoves, currentEnergy, minimumEnerg
         const moveContext = { amphipod, move, mirror: true };
 
         const moveDiagram = clone(diagram);
-        executedMove(moveDiagram, moveContext);
+        executeMove(moveDiagram, moveContext);
 
         const totalEnergy =
           currentEnergy + getEnergy(moveContext) + getMinimumRequiredEnergy(moveDiagram);
@@ -375,7 +360,7 @@ function canExecuteMove(diagram, from, to) {
   return true;
 }
 
-function executedMove(diagram, { amphipod: { type }, move: { to, from }, mirror }) {
+function executeMove(diagram, { amphipod: { type }, move: { to, from }, mirror }) {
   const actualTo = mirror ? from : to;
   const actualFrom = mirror ? to : from;
 
